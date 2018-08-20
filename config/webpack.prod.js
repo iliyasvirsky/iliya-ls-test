@@ -30,14 +30,5 @@ module.exports = merge(commonConfig, {
           }),
       ]
     }
-    // new webpack.optimize.minimize({
-    //   compressor: {
-    //     warnings: false,
-    //     screw_ie8: true
-    //   },
-    //   output: {
-    //     comments: false
-    //   }
-    // })
   ]
 });
