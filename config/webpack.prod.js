@@ -13,15 +13,27 @@ module.exports = merge(commonConfig, {
   },
 
   plugins: [
-    // config.optimization.minimize
-    new webpack.optimize.minimize({
-      compressor: {
-        warnings: false,
-        screw_ie8: true
-      },
-      output: {
-        comments: false
-      }
-    })
+    // minimizer: [
+    //   new UglifyJsPlugin({
+    // 
+    //   })
+    // ],
+    minimizer: [
+        //https://github.com/mishoo/UglifyJS2/tree/harmony
+        new UglifyJsPlugin({
+            uglifyOptions: {
+                output: {
+                    comments: false
+                },
+                minify: {},
+                compress: {
+                  cache: true,
+                  parallel: true,
+                  sourceMap: true
+                }
+            }
+        }),
+    ]
+
   ]
 });
