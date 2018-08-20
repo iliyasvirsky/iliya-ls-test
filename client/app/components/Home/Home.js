@@ -10,7 +10,8 @@ class Home extends Component {
     this.state = {
       changed: false,
       user: {},
-      image: {}
+      image: {},
+      newImage: false
     };
     
     this.handleNameChange = this.handleNameChange.bind(this);
@@ -37,7 +38,7 @@ class Home extends Component {
     const image = event.target.files[0];
     // user.image = image
     console.log("image", image);
-    this.setState({image})
+    this.setState({image, newImage:true})
   
   }
   
@@ -56,7 +57,7 @@ class Home extends Component {
     fetch('/api/image/'+this.state.user.id, requestOptions)
       .then(res => {
         console.log('made it boyzzz', res)
-        // this.setState({image: {}})
+        this.setState({image: {}, newImage:false})
       })
       .catch((err) => console.error(err));
   }
@@ -74,7 +75,7 @@ class Home extends Component {
         body: user
       })
         .then(res => {
-          console.log('made it boyzzz', res)
+          console.log('registerd it', res)
           this.setState({changed: false})
         })
         .catch((err) => console.error(err));
