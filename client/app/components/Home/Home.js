@@ -1,108 +1,128 @@
 import React, { Component } from 'react';
 import 'whatwg-fetch';
 
+
+
 class Home extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      counters: []
+      changed: false,
+      user: {},
+      image: {}
     };
-
-    this.newCounter = this.newCounter.bind(this);
-    this.incrementCounter = this.incrementCounter.bind(this);
-    this.decrementCounter = this.decrementCounter.bind(this);
-    this.deleteCounter = this.deleteCounter.bind(this);
-
-    this._modifyCounter = this._modifyCounter.bind(this);
+    
+    this.handleNameChange = this.handleNameChange.bind(this);
+    this.handleDescChange = this.handleDescChange.bind(this);
+    this.fileChangedHandler = this.fileChangedHandler.bind(this);
+    this.changeUser = this.changeUser.bind(this);
+    this.uploadPic = this.uploadPic.bind(this);
+    
   }
 
-  componentDidMount() {
-    fetch('/api/counters')
-      .then(res => res.json())
-      .then(json => {
-        this.setState({
-          counters: json
-        });
-      });
+  handleNameChange(event) {
+    let user = {...this.state.user}
+    user.name = event.target.value;
+    this.setState({user, changed: true})
   }
-
-  newCounter() {
-    fetch('/api/counters', { method: 'POST' })
-      .then(res => res.json())
-      .then(json => {
-        let data = this.state.counters;
-        data.push(json);
-
-        this.setState({
-          counters: data
-        });
-      });
+  
+  handleDescChange(event) {
+    let user = {...this.state.user}
+    user.desc = event.target.value;
+    this.setState({user,  changed: true})
+  } 
+  
+  fileChangedHandler(event) {
+    const image = event.target.files[0];
+    // user.image = image
+    console.log("image", image);
+    this.setState({image})
+  
   }
-
-  incrementCounter(index) {
-    const id = this.state.counters[index]._id;
-
-    fetch(`/api/counters/${id}/increment`, { method: 'PUT' })
-      .then(res => res.json())
-      .then(json => {
-        this._modifyCounter(index, json);
-      });
+  
+  uploadPic(event) {
+    
+    const formData = new FormData()
+    formData.append('image', this.state.image)
+    console.log('form', formData);
+    const requestOptions = {
+      method: 'POST',
+      body: formData,
+      credentials: 'same-origin'
+    };
+    
+    // technecly i could just do 1 because there is only 1 user
+    fetch('/api/image/'+this.state.user.id, requestOptions)
+      .then(res => {
+        console.log('made it boyzzz', res)
+        // this.setState({image: {}})
+      })
+      .catch((err) => console.error(err));
   }
-
-  decrementCounter(index) {
-    const id = this.state.counters[index]._id;
-
-    fetch(`/api/counters/${id}/decrement`, { method: 'PUT' })
-      .then(res => res.json())
-      .then(json => {
-        this._modifyCounter(index, json);
-      });
-  }
-
-  deleteCounter(index) {
-    const id = this.state.counters[index]._id;
-
-    fetch(`/api/counters/${id}`, { method: 'DELETE' })
-      .then(_ => {
-        this._modifyCounter(index, null);
-      });
-  }
-
-  _modifyCounter(index, data) {
-    let prevData = this.state.counters;
-
-    if (data) {
-      prevData[index] = data;
-    } else {
-      prevData.splice(index, 1);
+  
+  
+  changeUser(event) {
+    if(this.state.changed) {
+      let user = JSON.stringify({user: this.state.user})
+      console.log(user);
+      fetch('/api/user/'+this.state.user.id, { 
+        headers:{
+          'Content-Type': 'application/json'
+        },
+        method: 'POST',
+        body: user
+      })
+        .then(res => {
+          console.log('made it boyzzz', res)
+          this.setState({changed: false})
+        })
+        .catch((err) => console.error(err));
     }
-
-    this.setState({
-      counters: prevData
-    });
+    
+  }
+  componentDidMount() {
+    // this would use a cookie if there were more then 1 user
+    fetch('/api/me')
+      .then(res => res.json())
+      .then(user => {
+        this.setState({user: user[0]});
+      });
   }
 
   render() {
     return (
-      <>
-        <p>Counters:</p>
+      <main className="col-md-3 container">
+        <form>
+          <div className="form-group">
+            <label htmlFor="name h3">Name: </label>
+            <br />
+            <input className="form-group" type="text" value={this.state.user.name} onChange={this.handleNameChange} />
+          </div>
+          <div className="form-group">
+            <label htmlFor="desc">Description of yourself: </label>
+            <br />
+            <input className="form-group" type="text" value={this.state.user.desc} onChange={this.handleDescChange} />
+          </div>
+          <button className="btn btn-primary" onClick={this.changeUser} disabled={!this.state.changed}> 
+            Save! 
+          </button>
+        </form>
+        <br />
+          
+        <h3>profile picture:</h3> 
+        <img className="img-fluid" src={window.location.origin+'/api/image/1'} />              
 
-        <ul>
-          { this.state.counters.map((counter, i) => (
-            <li key={i}>
-              <span>{counter.count} </span>
-              <button onClick={() => this.incrementCounter(i)}>+</button>
-              <button onClick={() => this.decrementCounter(i)}>-</button>
-              <button onClick={() => this.deleteCounter(i)}>x</button>
-            </li>
-          )) }
-        </ul>
-
-        <button onClick={this.newCounter}>New counter</button>
-      </>
+        <div className="form-group">
+          <input type="file" onChange={this.fileChangedHandler} />
+        </div>
+        <button  className="btn btn-primary"  onClick={this.uploadPic} disabled={!this.state.image}> 
+          Upload Pic! 
+        </button>
+      </main>
     );
   }
 }
 
+// <label htmlFor="picture">upload new picture</label>
 export default Home;

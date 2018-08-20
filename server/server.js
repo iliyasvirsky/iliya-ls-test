@@ -1,4 +1,7 @@
 const express = require('express');
+// const multer = require('multer');
+// const upload = multer();
+
 const fs = require('fs');
 const historyApiFallback = require('connect-history-api-fallback');
 const mongoose = require('mongoose');
@@ -24,6 +27,7 @@ mongoose.Promise = global.Promise;
 const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
 
 // API routes
 require('./routes')(app);
