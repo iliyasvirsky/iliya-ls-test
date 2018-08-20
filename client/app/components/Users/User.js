@@ -21,13 +21,14 @@ class User extends Component {
 
   render() {
     const user = this.state.user;
+    const id = this.props.match.params.id
     if(user) {
       return (
         <div>
     
           <h3>profile picture:</h3> 
           
-          <img className="img-fluid" src={window.location.origin+'/api/image/'+user.id} />              
+          <img className="img-fluid" src={window.location.origin+'/api/image/'+id} />              
           
           <h3>name</h3>
           <h4>{user.name}</h4>

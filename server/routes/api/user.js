@@ -27,7 +27,6 @@ module.exports = (app) => {
 
   app.get('/api/image/:userId', (req, res, next) => {
     console.log('image get here', req.params.userId)
-    
     Users.find({ id: req.params.userId })
     .then((user, err) => {
       console.log('image test ', user[0].image)
@@ -77,7 +76,7 @@ module.exports = (app) => {
         throw err
         res.status(500).send(err)
       }
-      res.status(202).send(updatedUser)        
+      res.sendStatus(202)        
     })
   });
 
@@ -98,34 +97,7 @@ module.exports = (app) => {
         res.status(202).send(updatedUser)        
       })
     
-    
-    
-    // .then((user) => {
-    //   console.log('user image before', user)
-    //   let image= {};
-    //   image.data = fs.readFileSync(formData.path);
-    //   image.contentType = formData.mimetype;
-    //   console.log('user image after',   image);
-    //   user.image = image
-    //   user.imageType = formData.mimetype;
-    //   // user.save();
-    //   console.log('user saved()');
-    // }).catch((err) => {
-    //   console.log('error', err)
-    // })
   });
 
 
-  // app.post('/api/image/:userId', function (req, res, next) {
-  //   console.log('user ', req.image)
-  //   // let data = "not sync";
-  //   // data = fs.readFileSync(req.files.path)
-  //   console.log('data', data)
-
-  //   // newItem.img.data
-  //   // newItem.img.contentType = ‘image/png’;
-  //   // newItem.save();      
-  //   res.send('got it')
-  // 
-  // });
 }
