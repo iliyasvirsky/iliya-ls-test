@@ -12,6 +12,7 @@ import App from './components/App/App';
 import NotFound from './components/App/NotFound';
 
 import Home from './components/Home/Home';
+import Login from './components/Home/Login';
 
 import Users from './components/Users/Users';
 import User from './components/Users/User';
@@ -23,6 +24,7 @@ render((
     <App>
       <Switch>
         <Route exact path="/" component={Home}/>
+        <Route exact path="/login" component={Login}/>
         <Route path="/users" component={Users}/>
         <Route path="/user/:id" component={User}/>
         <Route component={NotFound}/>

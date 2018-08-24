@@ -1,7 +1,14 @@
 import React, { Component } from 'react';
+import ReactLoading from 'react-loading';
+
 import 'whatwg-fetch';
 
-
+const loader = {
+  display: 'block',
+  marginLeft: 'auto',
+  marginRight: 'auto',
+  width: '50%'
+}
 
 class Home extends Component {
   constructor(props) {
@@ -13,6 +20,8 @@ class Home extends Component {
       image: {},
       newImage: false
     };
+    
+    this.uploadPic = this.uploadPic.bind(this);
     
     this.handleNameChange = this.handleNameChange.bind(this);
     this.handleDescChange = this.handleDescChange.bind(this);
@@ -36,27 +45,21 @@ class Home extends Component {
   
   fileChangedHandler(event) {
     const image = event.target.files[0];
-    // user.image = image
-    console.log("image", image);
     this.setState({image, newImage:true})
   
   }
   
   uploadPic(event) {
-    
     const formData = new FormData()
     formData.append('image', this.state.image)
-    console.log('form', formData);
     const requestOptions = {
       method: 'POST',
       body: formData,
       credentials: 'same-origin'
     };
     
-    // technecly i could just do 1 because there is only 1 user
     fetch('/api/image/'+this.state.user.id, requestOptions)
       .then(res => {
-        console.log('made it boyzzz', res)
         this.setState({image: {}, newImage:false})
       })
       .catch((err) => console.error(err));
@@ -66,7 +69,6 @@ class Home extends Component {
   changeUser(event) {
     if(this.state.changed) {
       let user = JSON.stringify({user: this.state.user})
-      console.log(user);
       fetch('/api/user/'+this.state.user.id, { 
         headers:{
           'Content-Type': 'application/json'
@@ -75,7 +77,6 @@ class Home extends Component {
         body: user
       })
         .then(res => {
-          console.log('registerd it', res)
           this.setState({changed: false})
         })
         .catch((err) => console.error(err));
@@ -84,44 +85,62 @@ class Home extends Component {
   }
   componentDidMount() {
     // this would use a cookie if there were more then 1 user
-    fetch('/api/me')
+    if(document.cookie) {
+      return fetch('/api/me', {
+          credentials: 'same-origin', // include, same-origin, *omit
+          headers: {
+              'Content-Type': 'application/json',
+          }
+      })
       .then(res => res.json())
       .then(user => {
         this.setState({user: user[0]});
       });
+    } else {
+      this.props.history.push("/login");
+    }
   }
 
   render() {
-    return (
-      <main className="col-md-3 container">
-        <form>
+    
+      const id = this.state.user.id
+
+      if(id) {
+        return (
+          <main className="col-md-3 container">
+          <form>
           <div className="form-group">
-            <label htmlFor="name h3">Name: </label>
-            <br />
-            <input className="form-group" type="text" value={this.state.user.name} onChange={this.handleNameChange} />
+          <label htmlFor="name h3">Name: </label>
+          <br />
+          <input className="form-group" type="text" value={this.state.user.name} onChange={this.handleNameChange} />
           </div>
           <div className="form-group">
-            <label htmlFor="desc">Description of yourself: </label>
-            <br />
-            <input className="form-group" type="text" value={this.state.user.desc} onChange={this.handleDescChange} />
+          <label htmlFor="desc">Description of yourself: </label>
+          <br />
+          <input className="form-group" type="text" value={this.state.user.desc} onChange={this.handleDescChange} />
           </div>
           <button className="btn btn-primary" onClick={this.changeUser} disabled={!this.state.changed}> 
-            Save! 
+          Save! 
           </button>
-        </form>
-        <br />
+          </form>
+          <br />
           
-        <h3>profile picture:</h3> 
-        <img className="img-fluid" src={window.location.origin+'/api/image/1'} />              
-
-        <div className="form-group">
+          <h3>profile picture:</h3> 
+          <img className="img-fluid" src={window.location.origin+'/api/image/'+id} />              
+          
+          <div className="form-group">
           <input type="file" onChange={this.fileChangedHandler} />
-        </div>
-        <button  className="btn btn-primary"  onClick={this.uploadPic} disabled={!this.state.image}> 
+          </div>
+          <button  className="btn btn-primary"  onClick={this.uploadPic} disabled={!this.state.image}> 
           Upload Pic! 
-        </button>
-      </main>
-    );
+          </button>
+          </main>
+        );
+      } else {
+        return (
+          <ReactLoading type='spin' color='blue' style={loader} height={667} width={375} />
+        );
+      }
   }
 }
 

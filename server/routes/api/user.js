@@ -7,29 +7,21 @@ module.exports = (app) => {
 
   app.get('/api/me', (req, res, next) => {
     // normally i would take it from the cookie or make them log in
-    Users.find({ id: 1 })
+    const cookies = req.headers.cookie.split(';');
+    Users.find({ id: cookies[0].split('=')[1], accessToken: cookies[1].split('=')[1] })
     .then((user) => {
       if(user.length) {
         res.send(user)
       } else {
-        //create data incase none exist
-        Users.create({name: 'Sammy Blue', id: 2, desc: 'Im very tall person'})
-        Users.create({name: 'Eric Green', id: 3, desc: 'Im a little fat'})
-        Users.create({name: 'Johnny Smith', id: 1, desc: 'Im just drunk'})
-        .then((user) => {
-          res.send(user)
-        })
-        .catch((err) => next(err));
+        res.sendStatus(404)
       }
     })
     .catch((err) => next(err));
   });
 
   app.get('/api/image/:userId', (req, res, next) => {
-    console.log('image get here', req.params.userId)
     Users.find({ id: req.params.userId })
     .then((user, err) => {
-      console.log('image test ', user[0].image)
       if (err) return next(err);
       if(user.length) {        
         res.contentType(user[0].imageType);
@@ -43,11 +35,9 @@ module.exports = (app) => {
 
 
   app.get('/api/user/:userId', (req, res, next) => {
-    console.log('req.params.userId ', req.params.userId)
     
     Users.find({ id: req.params.userId })
     .then((user) => {
-      console.log('user', user)
       if(user.length) {
         res.send(user)
       } else {
@@ -66,37 +56,58 @@ module.exports = (app) => {
      })
     .catch((err) => next(err));
   });
-
+  
+  app.post('/api/login', (req, res, next) => {
+    //create data incase none exist
+    
+    Users.find({},  { id: req.body.userID})
+    .then((user) => {
+      if(user.length) {
+        //if it finds users
+        
+        res.send(user)
+      } else {
+        Users.create({name: req.body.name, id: req.body.userID, desc: '', accessToken: req.body.accessToken})
+        .then((user) => {
+          res.send(user)
+        })
+        .catch((err) => next(err));
+      }
+     })
+    .catch((err) => next(err));  
+  });
+  
+  
   app.post('/api/user/:userId', function (req, res, next) {
-    console.log('POST FOR SINGLE USER ', req.body)
-    Users.find({ id: req.params.userId })
+    const cookies = req.headers.cookie.split(';');
+    Users.find({ id: cookies[0].split('=')[1], accessToken: cookies[1].split('=')[1] })
     .updateOne({$set: {name: req.body.user.name, desc: req.body.user.desc }}).then((err, updatedUser) => {
-      console.log('err', err)
       if (err) {
         throw err
         res.status(500).send(err)
       }
       res.sendStatus(202)        
     })
+    .catch((err) => res.status(401).send(err))
+    
   });
 
   app.post('/api/image/:userId',  upload.single('image'), (req, res) => {
     let formData = req.file;
-    console.log('form data', req.params.userId, formData);
     let image= {};
     image.data = fs.readFileSync(formData.path);
     image.contentType = formData.mimetype;
-    console.log('user image after',   image);
-    Users.find({ id: req.params.userId })  
+    const cookies = req.headers.cookie.split(';');
+    // can only push to your own so ill read cookie 
+    Users.find({ id: cookies[0].split('=')[1], accessToken: cookies[1].split('=')[1] })
     .updateOne({$set: {image: image, imageType: formData.mimetype }}).then((err, updatedUser) => {
-        console.log('err', err)
         if (err) {
           throw err
           res.status(500).send(err)
         }
         res.status(202).send(updatedUser)        
       })
-    
+    .catch((err) => res.status(401).send(err))
   });
 
 
