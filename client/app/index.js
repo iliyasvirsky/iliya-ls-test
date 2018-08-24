@@ -26,7 +26,7 @@ render((
         <Route exact path="/" component={Home}/>
         <Route exact path="/login" component={Login}/>
         <Route exact path="/users" component={Users}/>
-        <Route exact path="/user/:id" component={User}/>
+        <Route path="/user/:id" component={User}/>
         <Route component={NotFound}/>
       </Switch>
     </App>
