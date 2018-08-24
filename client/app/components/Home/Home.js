@@ -94,7 +94,6 @@ class Home extends Component {
           }
       })
       .then(res => {
-        console.log('res', res);
         if(res.status == 404) {
           this.props.history.push("/login");
         }

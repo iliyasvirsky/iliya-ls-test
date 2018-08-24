@@ -4,7 +4,6 @@ import 'whatwg-fetch';
 class User extends Component {
   constructor(props) {
     super(props);
-    console.log(this.props.match.params.id)
     this.state = {
       user: {}
     };
