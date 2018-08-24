@@ -39,7 +39,6 @@ module.exports = (app) => {
 
 
   app.get('/api/user/:userId', (req, res, next) => {
-    
     Users.find({ id: req.params.userId })
     .then((user) => {
       if(user.length) {
