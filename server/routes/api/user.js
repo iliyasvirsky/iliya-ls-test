@@ -23,9 +23,13 @@ module.exports = (app) => {
     Users.find({ id: req.params.userId })
     .then((user, err) => {
       if (err) return next(err);
-      if(user.length) {        
-        res.contentType(user[0].imageType);
-        res.send(user[0].image.data);
+      if(user.length) {    
+        if(user[0].imageType){
+          res.contentType(user[0].imageType);
+          res.send(user[0].image.data);
+        } else {
+          res.send('no picture')
+        }   
       } else {
         res.status(404).send('not found')
       }
@@ -59,21 +63,10 @@ module.exports = (app) => {
   
   app.post('/api/login', (req, res, next) => {
     //create data incase none exist
-    
-    Users.find({},  { id: req.body.userID})
-    .then((user) => {
-      if(user.length) {
-        //if it finds users
-        
-        res.send(user)
-      } else {
-        Users.create({name: req.body.name, id: req.body.userID, desc: '', accessToken: req.body.accessToken})
-        .then((user) => {
-          res.send(user)
-        })
-        .catch((err) => next(err));
-      }
-     })
+    Users.update( { id: req.body.userID}, {name: req.body.name, id: req.body.userID, accessToken: req.body.accessToken}, { upsert : true } )
+    .then(user => {
+      res.send(user);
+    })
     .catch((err) => next(err));  
   });
   

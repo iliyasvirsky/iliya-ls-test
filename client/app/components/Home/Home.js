@@ -18,7 +18,8 @@ class Home extends Component {
       changed: false,
       user: {},
       image: {},
-      newImage: false
+      newImage: false,
+      loggedIn: false
     };
     
     this.uploadPic = this.uploadPic.bind(this);
@@ -92,7 +93,13 @@ class Home extends Component {
               'Content-Type': 'application/json',
           }
       })
-      .then(res => res.json())
+      .then(res => {
+        console.log('res', res);
+        if(res.status == 404) {
+          this.props.history.push("/login");
+        }
+        return res.json()
+      })
       .then(user => {
         this.setState({user: user[0]});
       });
